@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+node_modules/
+npm-debug.log
+.env
+.idea/
+.vscode/
+dist/
+build/
+*.log

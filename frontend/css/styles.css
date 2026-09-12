@@ -1,0 +1,266 @@
+:root {
+  /* Grafana Light Theme Palette */
+  --bg-main: #f4f5f5;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+  
+  --text-main: #24292e;      
+  --text-secondary: #5c6e74; 
+  
+  --color-normal: #3274d9;   /* Grafana blue */
+  --color-anomaly: #e02f44;  /* Grafana red */
+  --color-warning: #ff9830;  /* Grafana orange */
+  --color-success: #299c46;  /* Grafana green */
+  --color-accent: #3274d9;   
+  
+  --border-color: #d1d5d9;   
+  --panel-border: 1px solid #e0e4e8;
+  --sidebar-width: 250px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Typography */
+h1, .page-title { font-size: 28px; font-weight: 400; color: var(--text-main); }
+h2, .section-title { font-size: 16px; font-weight: 500; color: var(--text-main); margin-bottom: 8px; }
+h3, .card-title { font-size: 14px; font-weight: 500; color: var(--text-main); }
+p, .body-text { font-size: 14px; color: var(--text-secondary); }
+.important-value { font-size: 32px; font-weight: 500; color: var(--text-main); }
+.status-text { font-size: 14px; font-weight: 500; text-transform: capitalize; }
+
+.status-normal { color: var(--color-success); }
+.status-anomaly { color: var(--color-anomaly); }
+
+/* SIDEBAR - Grafana style */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: #181b1f; /* Grafana keeps sidebar dark even in light theme often, or we can use light. Let's use standard Grafana dark sidebar */
+  border-right: none;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  color: #c7d0d9;
+}
+
+.sidebar-header {
+  padding: 0 20px 24px;
+  border-bottom: 1px solid #2c3235;
+  margin-bottom: 16px;
+}
+.sidebar-header h2 { margin-bottom: 4px; font-size: 16px; color: #ffffff; font-weight: 500; }
+.sidebar-header p { font-size: 12px; font-weight: 400; color: #8e99a2; }
+
+.nav-menu {
+  list-style: none;
+  flex-grow: 1;
+}
+.nav-item {
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 400;
+  color: #c7d0d9;
+  border-left: 3px solid transparent;
+}
+.nav-item:hover {
+  background-color: #2c3235;
+  color: #ffffff;
+}
+.nav-item.active {
+  background-color: #2c3235;
+  color: #ffffff;
+  border-left: 3px solid var(--color-warning); /* Grafana active orange */
+}
+
+.sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid #2c3235;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8e99a2;
+}
+.connection-status { margin-bottom: 8px; }
+.dot-online { color: var(--color-success); font-size: 14px; }
+
+/* MAIN CONTENT */
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.top-bar {
+  display: none; /* Hide top bar to feel more like a full dashboard view */
+}
+
+.page-container {
+  padding: 20px;
+  display: none;
+}
+.page-container.active {
+  display: block;
+}
+
+/* CARDS & GRIDS (Grafana Panels) */
+.card {
+  background-color: var(--bg-card);
+  border: var(--panel-border);
+  border-radius: 2px;
+  padding: 12px 16px;
+  position: relative;
+}
+/* A small orange line at top of cards, classic Grafana */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: transparent;
+  transition: background-color 0.2s;
+}
+.card:hover::before {
+  background-color: var(--color-warning);
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.grid-5x2 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.tank-card {
+  cursor: pointer;
+}
+.tank-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+.tank-card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 12px;
+}
+.stat-label { color: var(--text-secondary); font-size: 12px; }
+.stat-value { font-weight: 500; color: var(--text-main); font-size: 14px;}
+
+/* TABLES (Grafana Table Panel) */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-card);
+  border: var(--panel-border);
+  border-radius: 2px;
+}
+.data-table th, .data-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e4e8;
+  font-size: 13px;
+}
+.data-table th {
+  background-color: #f7f8fa;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 2px solid #e0e4e8;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover {
+  background-color: #f4f5f5;
+}
+.data-table tbody tr.clickable:hover {
+  background-color: #eef0f2;
+  cursor: pointer;
+}
+
+/* BUTTONS */
+button {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+button:hover:not([disabled]) {
+  background: #e0e4e8;
+}
+button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* TANK DETAILS SPECIFIC */
+.back-button {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-bottom: 16px;
+  display: inline-block;
+}
+.back-button:hover {
+  color: var(--text-main);
+}
+
+.detail-header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.grid-8 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.chart-container {
+  height: 300px;
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.diagnosis-list {
+  list-style: none;
+}
+.diagnosis-list li {
+  padding: 6px 0;
+  border-bottom: 1px solid #e0e4e8;
+  display: flex;
+  font-size: 13px;
+}
+.diagnosis-list li:last-child { border-bottom: none; }
+.diagnosis-label { width: 150px; font-weight: 500; color: var(--text-secondary); }
+
+

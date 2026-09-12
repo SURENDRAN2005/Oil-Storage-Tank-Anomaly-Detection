@@ -1,0 +1,45 @@
+.tank-graphic {
+  width: 48px;
+  height: 80px;
+  position: relative;
+  margin-right: 16px;
+}
+
+.tank-graphic-outline {
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--color-border);
+  border-radius: 8px 8px 4px 4px;
+  position: relative;
+  overflow: hidden;
+  background-color: #f8fafc;
+}
+
+/* Add a cap to the top to look like a tank */
+.tank-graphic-outline::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 20%;
+  width: 60%;
+  height: 4px;
+  background-color: var(--color-border);
+  border-radius: 4px 4px 0 0;
+}
+
+.tank-graphic-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  transition: height 0.3s ease, background-color 0.3s ease;
+}
+
+.tank-graphic-rib {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}

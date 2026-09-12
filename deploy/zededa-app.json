@@ -1,0 +1,29 @@
+{
+    "appType": "container",
+    "name": "oil-tank-anomaly-detector",
+    "title": "Oil Tank Anomaly Detector (V6.2)",
+    "description": "Edge AI inference service for real-time anomaly detection in oil storage tanks using Isolation Forest and Random Forest.",
+    "cpus": 2,
+    "memory": 2048,
+    "storage": 5,
+    "networks": [
+        {
+            "name": "factory-lan",
+            "type": "ethernet",
+            "ipAddress": "dhcp"
+        }
+    ],
+    "image": "docker.io/yourcompany/oil-tank-anomaly-detector:6.2.0",
+    "env": {
+        "MQTT_BROKER": "192.168.1.100",
+        "MQTT_PORT": "1883",
+        "PUBLISH_INTERVAL": "5.0"
+    },
+    "ports": [
+        {
+            "internal": 8000,
+            "external": 8000,
+            "protocol": "tcp"
+        }
+    ]
+}
