@@ -18,10 +18,12 @@ V7_MODELS_DIR.mkdir(parents=True, exist_ok=True)
 FEATURES = [
     'level_rate_m_min', 
     'residual_l', 
-    'residual_rate', 
-    'residual_roll_mean_5m', 
-    'residual_roll_std_15m', 
-    'cumulative_residual_60m'
+    'residual_slope_15', 
+    'residual_mean_5', 
+    'residual_std_15', 
+    'cumulative_residual',
+    'water_rate_m_min',
+    'normalized_residual'
 ]
 
 def split_data(df):

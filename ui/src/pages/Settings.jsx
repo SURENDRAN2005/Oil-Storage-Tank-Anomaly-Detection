@@ -111,9 +111,11 @@ export default function Settings() {
               </label>
               <select value={scenario} onChange={e => setScenario(e.target.value)} style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--color-border)', borderRadius: '4px' }}>
                 <option value="normal">Normal Operation</option>
+                <option value="auto">Auto-Simulate All Events</option>
                 <option value="slow_leak">Slow Leak (Bottom Valve)</option>
                 <option value="water_ingress">Water Ingress (Roof Drain)</option>
-                <option value="sensor_drift">Level Sensor Drift</option>
+                <option value="level_sensor_fault">Level Sensor Stuck</option>
+                <option value="flow_meter_fault">Flow Meter Fault</option>
                 <option value="theft">Unauthorized Withdrawal</option>
               </select>
             </div>

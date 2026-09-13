@@ -34,9 +34,7 @@ export default function Header() {
         <div className="header-subtitle">{subtitle}</div>
       </div>
       <div className="header-actions">
-        <div className="header-status">
-          ZEDEDA EDGE <span className="status-dot green ml-2"></span> ONLINE
-        </div>
+
         <button className="icon-btn">
           <Bell size={20} />
         </button>

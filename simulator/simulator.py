@@ -46,6 +46,10 @@ class TankSimulator:
         if random.random() < 0.05: # 5% chance to change state
             self.state = random.choice(['RECEIPT', 'DELIVERY', 'IDLE', 'IDLE'])
             
+        if is_target and scenario in ['level_sensor_fault', 'flow_meter_fault']:
+            if self.state == 'IDLE':
+                self.state = random.choice(['RECEIPT', 'DELIVERY'])
+            
         if self.state == 'RECEIPT':
             self.inflow = random.uniform(100, 200)
             self.valve_closed = False
@@ -74,11 +78,11 @@ class TankSimulator:
         if is_target:
             if scenario == 'slow_leak':
                 actual_volume_change -= random.uniform(20, 40)
-            elif scenario == 'unauthorized_withdrawal':
+            elif scenario == 'theft':
                 actual_volume_change -= random.uniform(200, 300)
                 self.valve_closed = True # Rule 1 trigger
             elif scenario == 'water_ingress':
-                self.water_interface_m += 0.005
+                self.water_interface_m += 0.015
                 actual_volume_change += 20
                 
         self.true_std_oil_vol_l += actual_volume_change
@@ -145,6 +149,10 @@ def run_simulator():
     
     conn = get_db()
     
+    auto_end_time = 0
+    auto_scenario = 'normal'
+    auto_target = 'none'
+    
     print("Starting simulation loop...")
     while True:
         try:
@@ -154,9 +162,26 @@ def run_simulator():
             scenario = state_row['scenario'] if state_row else 'normal'
             target_tank = state_row['target_tank'] if state_row else 'none'
             
+            if scenario == 'auto':
+                if time.time() > auto_end_time:
+                    if random.random() < 0.2: # 20% chance to start event
+                        auto_scenario = random.choice(['slow_leak', 'theft', 'water_ingress', 'level_sensor_fault', 'flow_meter_fault'])
+                        auto_target = random.choice(TANKS)
+                        auto_end_time = time.time() + random.uniform(20, 60) # 20-60 real seconds
+                        print(f"Auto-Sim: Started {auto_scenario} on {auto_target}")
+                    else:
+                        auto_scenario = 'normal'
+                        auto_target = 'none'
+                        auto_end_time = time.time() + random.uniform(10, 20) # 10-20 seconds wait
+                active_scenario = auto_scenario
+                active_target = auto_target
+            else:
+                active_scenario = scenario
+                active_target = target_tank
+            
             for t_id, tank in tanks.items():
-                is_target = (scenario != 'normal' and target_tank == t_id)
-                reading = tank.step(scenario, is_target)
+                is_target = (active_scenario != 'normal' and active_target == t_id)
+                reading = tank.step(active_scenario, is_target)
                 
                 # --- ML PIPELINE execution ---
                 
@@ -202,16 +227,27 @@ def run_simulator():
                 reading['operating_state'] = op_state
                 
                 # 3. Feature extraction
-                if len(tank.history) >= 2:
-                    res_rate = tank.history['residual_l'].diff().iloc[-1]
+                dt = 0.5
+                if len(tank.history) >= 16:
+                    res_slope_15 = (residual - tank.history['residual_l'].iloc[-16]) / (15 * dt)
                 else:
-                    res_rate = 0
+                    res_slope_15 = 0
                     
-                res_mean_5m = tank.history['residual_l'].tail(10).mean()
-                res_std_15m = tank.history['residual_l'].tail(30).std()
-                res_sum_60m = tank.history['residual_l'].sum()
+                res_mean_5 = tank.history['residual_l'].tail(5).mean()
+                res_std_15 = tank.history['residual_l'].tail(15).std() if len(tank.history) >= 2 else 0
+                cumulative_residual = tank.history['residual_l'].tail(120).sum()
+                normalized_residual = residual / (TANK_AREA_M2[t_id] * 20000)
                 
-                features_vec = [level_rate, residual, res_rate, res_mean_5m, res_std_15m, res_sum_60m]
+                features_vec = [
+                    level_rate, 
+                    residual, 
+                    res_slope_15, 
+                    res_mean_5, 
+                    res_std_15, 
+                    cumulative_residual,
+                    water_rate,
+                    normalized_residual
+                ]
                 features_vec = [0 if np.isnan(x) else x for x in features_vec]
                 
                 # 4. IF Model scoring
@@ -219,7 +255,7 @@ def run_simulator():
                 if t_id in models and op_state in models[t_id]:
                     model = models[t_id][op_state]
                     scaler = scalers[t_id][op_state]
-                    thresh = thresholds[t_id][op_state]
+                    thresh = thresholds.get(t_id, {}).get(op_state, -0.6) # Fallback if missing
                     
                     x_scaled = scaler.transform([features_vec])
                     score = float(model.score_samples(x_scaled)[0])
@@ -237,6 +273,8 @@ def run_simulator():
                     'outflow_l_min': reading['outflow_l_min']
                 }
                 fired_rules = evaluate_rules(rule_row)
+                if len(fired_rules) > 0:
+                    print(f"{t_id} fired rules: {fired_rules}, level_rate={level_rate:.6f}, residual={residual:.2f}", flush=True)
                 
                 is_rule_anomaly = len(fired_rules) > 0
                 is_abnormal = is_if_anomaly or is_rule_anomaly
@@ -260,15 +298,40 @@ def run_simulator():
                     s_idl = 1 if op_state == 'IDLE' else 0
                     s_rec = 1 if op_state == 'RECEIPT' else 0
                     
-                    diag_x = [
-                        res_sum_60m, level_rate, r1, r2, r3, r4, r5,
-                        residual, res_rate, res_mean_5m, res_std_15m,
-                        s_del, s_idl, s_rec
-                    ]
+                    # Load diagnosis feature order if not already loaded globally
+                    # We can assume it was loaded in run_simulator, let's just construct a dict
+                    feature_dict = {
+                        'cumulative_residual': cumulative_residual,
+                        'level_rate_m_min': level_rate,
+                        'normalized_residual': normalized_residual,
+                        'r1_drop': r1,
+                        'r2_water': r2,
+                        'r3_theft': r3,
+                        'r4_stuck': r4,
+                        'r5_flow': r5,
+                        'residual_l': residual,
+                        'residual_mean_5': res_mean_5,
+                        'residual_slope_15': res_slope_15,
+                        'residual_std_15': res_std_15,
+                        'state_DELIVERY': s_del,
+                        'state_IDLE': s_idl,
+                        'state_RECEIPT': s_rec,
+                        'water_rate_m_min': water_rate
+                    }
+                    
+                    # Sort alphabetically to match training
+                    diag_x = [feature_dict[k] for k in sorted(feature_dict.keys())]
                     diag_x = [0 if np.isnan(x) else x for x in diag_x]
                     
-                    diag_pred = rf.predict([diag_x])[0]
-                    diagnosis = str(diag_pred)
+                    if is_rule_anomaly and len(fired_rules) > 0:
+                        if "RULE_1" in fired_rules[0]: diagnosis = "Slow Leak (Bottom Valve)"
+                        elif "RULE_2" in fired_rules[0]: diagnosis = "Water Ingress (Roof Drain)"
+                        elif "RULE_3" in fired_rules[0]: diagnosis = "Unauthorized Withdrawal"
+                        elif "RULE_4" in fired_rules[0]: diagnosis = "Level Sensor Stuck"
+                        elif "RULE_5" in fired_rules[0]: diagnosis = "Flow Meter Fault"
+                    else:
+                        diag_pred = rf.predict([diag_x])[0]
+                        diagnosis = str(diag_pred)
                     
                     source = "MODEL"
                     if is_rule_anomaly and is_if_anomaly: source = "MODEL + RULE"
@@ -305,9 +368,13 @@ def run_simulator():
             conn.commit()
             
         except Exception as e:
-            print(f"Simulator Error: {e}")
+            print("Error in simulator loop:", e)
             import traceback
             traceback.print_exc()
+            try:
+                conn.rollback()
+            except:
+                pass
             
         time.sleep(2) # Run every 2 real seconds representing 30s intervals
 

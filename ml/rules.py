@@ -48,7 +48,7 @@ def evaluate_rules(row, residual_history=None):
     # but for simplicity if level rate is exactly 0.0 during flow, it's stuck.
     inflow = row.get('inflow_l_min', 0)
     outflow = row.get('outflow_l_min', 0)
-    if (inflow > 10 or outflow > 10) and abs(level_rate) < 0.0001:
+    if (inflow > 10 or outflow > 10) and abs(level_rate) < 0.00001:
         fired_rules.append("RULE_4_STUCK_LEVEL_SENSOR")
         
     # RULE 5: Flow and physical volume change strongly disagree
@@ -76,8 +76,11 @@ class PersistenceEngine:
         if is_abnormal:
             self.streaks[tank_id] += 1
         else:
-            # Optionally decay instead of immediate reset to handle noisy anomalies
-            self.streaks[tank_id] = max(0, self.streaks[tank_id] - 1)
+            # Decay quickly to clear alerts once conditions return to normal
+            if self.streaks[tank_id] >= self.min_intervals:
+                self.streaks[tank_id] = self.min_intervals - 1
+            else:
+                self.streaks[tank_id] = max(0, self.streaks[tank_id] - 1)
             
         alert_triggered = self.streaks[tank_id] >= self.min_intervals
         return alert_triggered, self.streaks[tank_id]

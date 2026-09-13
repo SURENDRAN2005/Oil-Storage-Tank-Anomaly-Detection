@@ -35,11 +35,11 @@ def prepare_diagnostic_dataset(df):
     
     # We need to map the event string to the 5 requested classes
     event_mapping = {
-        'leak': 'Suspected Leak',
+        'slow_leak': 'Suspected Leak',
         'theft': 'Suspected Theft',
         'water_ingress': 'Water Ingress',
-        'sensor_fault': 'Sensor Fault',
-        'flow_fault': 'Flow Meter Fault'
+        'level_sensor_fault': 'Sensor Fault',
+        'flow_meter_fault': 'Flow Meter Fault'
     }
     anomalous_df['target'] = anomalous_df['event'].map(event_mapping)
     

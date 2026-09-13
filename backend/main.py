@@ -126,6 +126,4 @@ def get_sim_status():
     conn.close()
     return dict(row)
 
-# Serve Frontend
-frontend_path = Path(__file__).resolve().parent.parent / "frontend"
-app.mount("/", StaticFiles(directory=str(frontend_path), html=True), name="frontend")
+# Removed old frontend serving

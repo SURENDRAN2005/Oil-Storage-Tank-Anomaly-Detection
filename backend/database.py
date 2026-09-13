@@ -5,8 +5,10 @@ from pathlib import Path
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "app.db"
 
 def get_db():
-    # Allow multithreading to avoid FastApi/Simulator lock issues
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    # Allow multithreading and use WAL mode for better concurrency
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=10.0)
+    conn.execute('PRAGMA journal_mode=WAL;')
+    conn.execute('PRAGMA synchronous=NORMAL;')
     conn.row_factory = sqlite3.Row
     return conn
 
