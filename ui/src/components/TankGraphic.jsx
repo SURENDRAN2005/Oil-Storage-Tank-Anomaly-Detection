@@ -2,7 +2,8 @@ import React from 'react';
 import './TankGraphic.css';
 
 export default function TankGraphic({ level, status }) {
-  const fillColor = status === 'ANOMALY' ? 'var(--color-danger)' : 'var(--color-success)';
+  const isAnomaly = status === 'ANOMALY';
+  const fillColor = isAnomaly ? 'var(--color-danger)' : 'var(--color-success)';
   const clampedLevel = Math.max(0, Math.min(100, level));
   
   return (

@@ -31,7 +31,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_SQLITE}"
+        "uid": "sqlite"
       },
       "fieldConfig": {
         "defaults": {
@@ -110,10 +110,10 @@
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_SQLITE}"
+            "uid": "sqlite"
           },
           "queryType": "table",
-          "rawSql": "SELECT \n  timestamp AS time,\n  level_m,\n  temperature_c\nFROM telemetry\nWHERE tank_id = 'T-101'\nORDER BY timestamp ASC",
+          "rawSql": "SELECT \n  CAST(strftime('%s', timestamp) AS INT) AS time,\n  level_m,\n  temperature_c\nFROM telemetry\nWHERE tank_id = 'T-101'\nORDER BY timestamp ASC",
           "refId": "A"
         }
       ],
@@ -123,7 +123,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_SQLITE}"
+        "uid": "sqlite"
       },
       "fieldConfig": {
         "defaults": {
@@ -178,10 +178,10 @@
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_SQLITE}"
+            "uid": "sqlite"
           },
           "queryType": "table",
-          "rawSql": "SELECT alert_id, timestamp, tank_id, event, severity, anomaly_score, status FROM alerts ORDER BY timestamp DESC LIMIT 20",
+          "rawSql": "SELECT alert_id, CAST(strftime('%s', timestamp) AS INT) AS time, tank_id, event, severity, anomaly_score, status FROM alerts ORDER BY timestamp DESC LIMIT 20",
           "refId": "A"
         }
       ],
@@ -205,3 +205,4 @@
   "uid": "f2ccf33b-8515-46ff-b74f-94578b982bfd",
   "version": 1
 }
+

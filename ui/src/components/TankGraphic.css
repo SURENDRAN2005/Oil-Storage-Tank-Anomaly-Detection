@@ -1,8 +1,8 @@
 .tank-graphic {
-  width: 48px;
-  height: 80px;
+  width: 56px;
+  height: 90px;
   position: relative;
-  margin-right: 16px;
+  margin-right: 20px;
 }
 
 .tank-graphic-outline {
@@ -12,7 +12,7 @@
   border-radius: 8px 8px 4px 4px;
   position: relative;
   overflow: hidden;
-  background-color: #f8fafc;
+  background-color: var(--color-bg-main);
 }
 
 /* Add a cap to the top to look like a tank */
@@ -32,7 +32,7 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  transition: height 0.3s ease, background-color 0.3s ease;
+  transition: height var(--transition-smooth), background-color var(--transition-smooth);
 }
 
 .tank-graphic-rib {

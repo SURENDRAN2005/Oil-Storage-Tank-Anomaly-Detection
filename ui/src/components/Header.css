@@ -2,6 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
 }
 
 .header-titles {
@@ -10,17 +11,12 @@
 }
 
 .header-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--color-primary);
   margin: 0;
   line-height: 1.2;
 }
 
 .header-subtitle {
-  font-size: 13px;
-  color: var(--color-text-muted);
-  font-weight: 500;
+  /* Uses global page-subtitle */
 }
 
 .header-actions {
@@ -45,15 +41,19 @@
 
 .icon-btn {
   color: var(--color-text-muted);
-  padding: 8px;
+  padding: 10px;
   border-radius: 50%;
-  transition: background-color 0.2s;
+  transition: all var(--transition-smooth);
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: var(--color-bg-main);
+  border: 1px solid var(--color-border);
 }
 
 .icon-btn:hover {
-  background-color: #f1f5f9;
-  color: var(--color-primary);
+  background-color: var(--color-bg-card-hover);
+  color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }

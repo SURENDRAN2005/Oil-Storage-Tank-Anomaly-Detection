@@ -126,4 +126,21 @@ def get_sim_status():
     conn.close()
     return dict(row)
 
-# Removed old frontend serving
+from fastapi.responses import FileResponse
+
+ui_dist = Path(__file__).resolve().parent.parent / "ui" / "dist"
+
+if ui_dist.exists():
+    # Mount assets explicitly
+    assets_dir = ui_dist / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+        
+    @app.get("/{full_path:path}")
+    def serve_react_app(full_path: str):
+        # Serve exact file if it exists (e.g. vite.svg, etc)
+        file_path = ui_dist / full_path
+        if full_path and file_path.is_file():
+            return FileResponse(file_path)
+        # Fallback to index.html for React Router
+        return FileResponse(ui_dist / "index.html")

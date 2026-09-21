@@ -22,6 +22,7 @@ function App() {
           <Route path="alerts/:alertId" element={<AlertDetails />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>
     </Router>
