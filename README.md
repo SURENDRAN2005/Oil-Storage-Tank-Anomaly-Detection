@@ -46,12 +46,63 @@ Once the container is running, the services will be available at:
 
 ## 📁 Repository Structure
 
-* `/ui` - React frontend source code.
-* `/backend` - FastAPI server handling API requests and database interactions.
-* `/simulator` - Python engine generating telemetry and evaluating anomaly rules.
-* `/grafana` - Provisioning files and pre-built dashboards for Grafana.
-* `start.sh` - The unified startup script executed inside the Docker container.
-* `Dockerfile` - The configuration to build the single-container image.
+```text
+Oil-Storage-Tank-Anomaly-Detection/
+├── Dockerfile                  # Single container build definition
+├── README.md                   # Project documentation
+├── start.sh                    # Container entrypoint script
+├── .gitignore                  # Git ignore rules
+├── backend/                    # FastAPI Backend
+│   ├── database.py             # SQLite connection & schema init
+│   ├── main.py                 # API routes (Telemetry, Alerts, Simulator)
+│   └── requirements.txt        
+├── simulator/                  # Python Telemetry Simulator
+│   ├── simulator.py            # Generates tank data & flags anomalies
+│   └── requirements.txt        
+├── grafana/                    # Grafana Configuration
+│   ├── dashboards/
+│   │   └── oil_storage_dashboard.json  # Pre-built Grafana dashboard
+│   └── provisioning/
+│       ├── dashboards/
+│       │   └── dashboard.yml           # Auto-loads dashboards
+│       └── datasources/
+│           └── datasource.yml          # Connects Grafana to SQLite
+├── ml/                         # Machine Learning & Rules Engine
+│   ├── diagnosis.py            # Anomaly diagnosis logic
+│   ├── feature_engineering.py  # Feature calculation (derivatives, residuals)
+│   ├── generate.py             # Synthetic data generation helpers
+│   └── rules.py                # Rule definitions for leak/pressure alerts
+├── data/                       # Persistent Storage Volume
+│   └── (SQLite .db files)      # app.db is mounted here
+└── ui/                         # React + Vite Frontend
+    ├── index.html              
+    ├── package.json            
+    ├── vite.config.js          
+    └── src/
+        ├── App.jsx             # React Router setup
+        ├── index.css           # Global "Premium Light" variables
+        ├── main.jsx            
+        ├── api/
+        │   └── index.js        # Axios API client wrapper
+        ├── components/
+        │   ├── Header.jsx      # Top navigation bar
+        │   ├── Header.css      
+        │   ├── Layout.jsx      # Main UI wrapper
+        │   ├── Layout.css      
+        │   ├── Sidebar.jsx     # Side navigation menu
+        │   ├── Sidebar.css     
+        │   ├── TankGraphic.jsx # Visual 3D-like tank component
+        │   └── TankGraphic.css 
+        └── pages/
+            ├── Dashboard.jsx   # Main overview dashboard
+            ├── Dashboard.css   
+            ├── StorageTanks.jsx# Tank list view
+            ├── TankDetails.jsx # Individual tank deep-dive
+            ├── Alerts.jsx      # Anomaly alerts list
+            ├── AlertDetails.jsx# Alert investigation view
+            ├── Analytics.jsx   # Historical data charts
+            └── Settings.jsx    # Simulator scenario controls
+```
 
 ## 🛠️ Local Development
 
